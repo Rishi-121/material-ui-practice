@@ -12,6 +12,8 @@ import {
   Paper,
   Chip,
   CircularProgress,
+  TableFooter,
+  TablePagination,
 } from "@material-ui/core";
 import { Navbar } from "./components";
 import axios from "axios";
@@ -22,25 +24,17 @@ const StyledTableCell = withStyles((theme) => ({
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
   },
-  body: {
-    fontSize: 14,
-  },
 }))(TableCell);
-
-const StyledTableRow = withStyles((theme) => ({
-  root: {
-    "&:nth-of-type(odd)": {
-      backgroundColor: theme.palette.action.hover,
-    },
-  },
-}))(TableRow);
 
 const useStyles = makeStyles((theme) => ({
   container: {
     padding: theme.spacing(4),
   },
   loader: {
-      
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "70vh",
   },
   table: {
     minWidth: 700,
@@ -56,6 +50,12 @@ const DataTable = () => {
   const [rowData, setRowData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+
+  const rowsPerPage = 5;
+
+  const emptyRows =
+    rowsPerPage - Math.min(rowsPerPage, rowData.length - page * rowsPerPage);
 
   const getRowData = async () => {
     try {
@@ -82,6 +82,10 @@ const DataTable = () => {
     return str;
   };
 
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
   useEffect(() => {
     getRowData();
   }, []);
@@ -94,7 +98,9 @@ const DataTable = () => {
         {error ? (
           ""
         ) : loading ? (
-          <CircularProgress />
+          <div className={classes.loader}>
+            <CircularProgress />
+          </div>
         ) : (
           <TableContainer component={Paper}>
             <Table className={classes.table} aria-label="customized table">
@@ -108,40 +114,64 @@ const DataTable = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rowData.map(
+                {(rowsPerPage > 0
+                  ? rowData.slice(
+                      page * rowsPerPage,
+                      page * rowsPerPage + rowsPerPage
+                    )
+                  : rowData
+                ).map(
                   (
                     { name, text, type, artist, mechanics, cardClass },
                     index
                   ) => (
-                    <StyledTableRow
+                    <TableRow
                       style={{
                         backgroundColor:
                           cardClass === "NEUTRAL" ? "#FFF7CB" : "#CBFBFF",
                       }}
+                      key={index}
                     >
-                      <StyledTableCell>{index + 1}</StyledTableCell>
-                      <StyledTableCell>
+                      <TableCell>{index + 1 + page * rowsPerPage}</TableCell>
+                      <TableCell>
                         <b>{name}</b>
                         <br />
                         <br />
                         {parser(text)}
-                      </StyledTableCell>
-                      <StyledTableCell>{toCamelCase(type)}</StyledTableCell>
-                      <StyledTableCell>{artist}</StyledTableCell>
-                      <StyledTableCell>
-                        {mechanics === undefined
+                      </TableCell>
+                      <TableCell>{toCamelCase(type)}</TableCell>
+                      <TableCell>{artist}</TableCell>
+                      <TableCell>
+                        {!mechanics
                           ? ""
-                          : mechanics.map((m) => (
+                          : mechanics.map((m, index) => (
                               <Chip
                                 label={toCamelCase(m)}
                                 className={classes.badge}
+                                key={index}
                               />
                             ))}
-                      </StyledTableCell>
-                    </StyledTableRow>
+                      </TableCell>
+                    </TableRow>
                   )
                 )}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 93 * emptyRows }}>
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
               </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[5]}
+                    count={rowData.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handlePageChange}
+                  />
+                </TableRow>
+              </TableFooter>
             </Table>
           </TableContainer>
         )}
