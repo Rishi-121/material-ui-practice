@@ -16,7 +16,7 @@ import {
   TablePagination,
   Typography,
 } from "@material-ui/core";
-import { Navbar } from "./components";
+import { Navbar, Footer } from "./components";
 import axios from "axios";
 import parser from "html-react-parser";
 
@@ -184,6 +184,7 @@ const DataTable = () => {
           </TableContainer>
         )}
       </Container>
+      <Footer />
     </>
   );
 };
