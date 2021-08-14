@@ -14,6 +14,7 @@ import {
   CircularProgress,
   TableFooter,
   TablePagination,
+  Typography,
 } from "@material-ui/core";
 import { Navbar } from "./components";
 import axios from "axios";
@@ -29,6 +30,9 @@ const StyledTableCell = withStyles((theme) => ({
 const useStyles = makeStyles((theme) => ({
   container: {
     padding: theme.spacing(4),
+  },
+  error: {
+    padding: theme.spacing(6),
   },
   loader: {
     display: "flex",
@@ -96,7 +100,11 @@ const DataTable = () => {
       <Navbar />
       <Container className={classes.container}>
         {error ? (
-          ""
+          <div className={classes.error}>
+            <Typography variant="h5" color="textSecondary" align="center">
+              Oops! something went wrong.
+            </Typography>
+          </div>
         ) : loading ? (
           <div className={classes.loader}>
             <CircularProgress />
